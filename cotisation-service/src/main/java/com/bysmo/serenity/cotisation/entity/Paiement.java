@@ -52,7 +52,7 @@ public class Paiement {
     @Column(name = "compte_externe_id")
     private UUID compteExterneId;
 
-    @JdbcTypeCode(SqlTypes.JSONB)
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "metadata", columnDefinition = "jsonb")
     private Map<String, Object> metadata;
 

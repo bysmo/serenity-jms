@@ -9,9 +9,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverter;
 import org.springframework.security.web.server.SecurityWebFilterChain;
-
 import java.util.Collection;
-import java.util.function.Customizer;
+import org.springframework.security.config.Customizer;
+import reactor.core.publisher.Flux;
 
 @Configuration
 @EnableWebFluxSecurity
@@ -37,7 +37,7 @@ public class SecurityConfig {
     public ReactiveJwtAuthenticationConverter reactiveJwtAuthenticationConverter(
             Converter<Jwt, Collection<GrantedAuthority>> keycloakRoleConverter) {
         ReactiveJwtAuthenticationConverter converter = new ReactiveJwtAuthenticationConverter();
-        converter.setJwtGrantedAuthoritiesConverter(keycloakRoleConverter);
+        converter.setJwtGrantedAuthoritiesConverter(jwt -> Flux.fromIterable(keycloakRoleConverter.convert(jwt)));
         return converter;
     }
 }
