@@ -1,0 +1,296 @@
+version: "3.9"
+
+# ============================================================
+# Serenity-JMS Docker Compose
+# ============================================================
+
+x-postgres-common: &postgres-common
+  image: postgres:16-alpine
+  restart: unless-stopped
+  env_file:
+    - .env
+  environment:
+    POSTGRES_USER: ${POSTGRES_USER}
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+  healthcheck:
+    test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+    interval: 10s
+    timeout: 5s
+    retries: 5
+  networks:
+    - serenity-net
+
+services:
+  # ──────────────────────────────────────────────────────────
+  # PostgreSQL Instances (one per microservice)
+  # ──────────────────────────────────────────────────────────
+
+  postgres-identity:
+    <<: *postgres-common
+    container_name: serenity-postgres-identity
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: serenity_identity
+    volumes:
+      - pgdata-identity:/var/lib/postgresql/data
+
+  postgres-admin:
+    <<: *postgres-common
+    container_name: serenity-postgres-admin
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: serenity_admin
+    volumes:
+      - pgdata-admin:/var/lib/postgresql/data
+
+  postgres-member:
+    <<: *postgres-common
+    container_name: serenity-postgres-member
+    ports:
+      - "5434:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: serenity_member
+    volumes:
+      - pgdata-member:/var/lib/postgresql/data
+
+  postgres-account:
+    <<: *postgres-common
+    container_name: serenity-postgres-account
+    ports:
+      - "5435:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: serenity_account
+    volumes:
+      - pgdata-account:/var/lib/postgresql/data
+
+  postgres-cotisation:
+    <<: *postgres-common
+    container_name: serenity-postgres-cotisation
+    ports:
+      - "5436:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: serenity_cotisation
+    volumes:
+      - pgdata-cotisation:/var/lib/postgresql/data
+
+  postgres-notification:
+    <<: *postgres-common
+    container_name: serenity-postgres-notification
+    ports:
+      - "5437:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: serenity_notification
+    volumes:
+      - pgdata-notification:/var/lib/postgresql/data
+
+  postgres-payment:
+    <<: *postgres-common
+    container_name: serenity-postgres-payment
+    ports:
+      - "5438:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: serenity_payment
+    volumes:
+      - pgdata-payment:/var/lib/postgresql/data
+
+  postgres-collector:
+    <<: *postgres-common
+    container_name: serenity-postgres-collector
+    ports:
+      - "5439:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: serenity_collector
+    volumes:
+      - pgdata-collector:/var/lib/postgresql/data
+
+  postgres-nanocredit:
+    <<: *postgres-common
+    container_name: serenity-postgres-nanocredit
+    ports:
+      - "5440:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: serenity_nanocredit
+    volumes:
+      - pgdata-nanocredit:/var/lib/postgresql/data
+
+  postgres-epargne:
+    <<: *postgres-common
+    container_name: serenity-postgres-epargne
+    ports:
+      - "5441:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: serenity_epargne
+    volumes:
+      - pgdata-epargne:/var/lib/postgresql/data
+
+  # ──────────────────────────────────────────────────────────
+  # PostgreSQL for Keycloak
+  # ──────────────────────────────────────────────────────────
+
+  postgres-keycloak:
+    <<: *postgres-common
+    container_name: serenity-postgres-keycloak
+    ports:
+      - "5442:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: serenity_keycloak
+    volumes:
+      - pgdata-keycloak:/var/lib/postgresql/data
+
+  # ──────────────────────────────────────────────────────────
+  # Keycloak
+  # ──────────────────────────────────────────────────────────
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    container_name: serenity-keycloak
+    restart: unless-stopped
+    command: start-dev
+    env_file:
+      - .env
+    environment:
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres-keycloak:5432/serenity_keycloak
+      KC_DB_USERNAME: ${POSTGRES_USER}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
+      KC_HEALTH_ENABLED: "true"
+    ports:
+      - "8180:8080"
+    depends_on:
+      postgres-keycloak:
+        condition: service_healthy
+    volumes:
+      - ./keycloak/serenity-realm.json:/opt/keycloak/data/import/serenity-realm.json
+    networks:
+      - serenity-net
+
+  # ──────────────────────────────────────────────────────────
+  # Zookeeper
+  # ──────────────────────────────────────────────────────────
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.0
+    container_name: serenity-zookeeper
+    restart: unless-stopped
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    volumes:
+      - zookeeper-data:/var/lib/zookeeper/data
+      - zookeeper-logs:/var/lib/zookeeper/log
+    networks:
+      - serenity-net
+
+  # ──────────────────────────────────────────────────────────
+  # Kafka
+  # ──────────────────────────────────────────────────────────
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: serenity-kafka
+    restart: unless-stopped
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_LOG_RETENTION_HOURS: 168
+    ports:
+      - "9092:9092"
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    networks:
+      - serenity-net
+
+  # ──────────────────────────────────────────────────────────
+  # Kafka UI (optional)
+  # ──────────────────────────────────────────────────────────
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: serenity-kafka-ui
+    restart: unless-stopped
+    depends_on:
+      - kafka
+    environment:
+      KAFKA_CLUSTERS_0_NAME: serenity
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+    ports:
+      - "9000:8080"
+    networks:
+      - serenity-net
+
+# ============================================================
+# Networks
+# ============================================================
+
+networks:
+  serenity-net:
+    driver: bridge
+    name: serenity-net
+
+# ============================================================
+# Volumes
+# ============================================================
+
+volumes:
+  pgdata-identity:
+    name: serenity-pgdata-identity
+  pgdata-admin:
+    name: serenity-pgdata-admin
+  pgdata-member:
+    name: serenity-pgdata-member
+  pgdata-account:
+    name: serenity-pgdata-account
+  pgdata-cotisation:
+    name: serenity-pgdata-cotisation
+  pgdata-notification:
+    name: serenity-pgdata-notification
+  pgdata-payment:
+    name: serenity-pgdata-payment
+  pgdata-collector:
+    name: serenity-pgdata-collector
+  pgdata-nanocredit:
+    name: serenity-pgdata-nanocredit
+  pgdata-epargne:
+    name: serenity-pgdata-epargne
+  pgdata-keycloak:
+    name: serenity-pgdata-keycloak
+  zookeeper-data:
+    name: serenity-zookeeper-data
+  zookeeper-logs:
+    name: serenity-zookeeper-logs
+  kafka-data:
+    name: serenity-kafka-data

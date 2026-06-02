@@ -1,0 +1,17 @@
+package com.bysmo.serenity.account.entity.enums;
+
+public enum MouvementType {
+    PAIEMENT,
+    APPROVISIONNEMENT,
+    TRANSFERT_OUT,
+    TRANSFERT_IN,
+    ANNULATION_PAIEMENT,
+    COTISATION,
+    ADHESION,
+    REMBOURSEMENT,
+    COLLECTE,
+    DEBOURS_NANO_CREDIT,
+    REMBOURSEMENT_NANO_CREDIT,
+    PENALITE,
+    VERSEMENT_EPARGNE
+}

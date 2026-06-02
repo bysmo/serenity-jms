@@ -1,0 +1,35 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: identity-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:8180/realms/serenity/protocol/openid-connect/certs
+
+keycloak:
+  realm: serenity
+  server-url: http://localhost:8180
+  admin-client-id: admin-cli
+  admin-username: admin
+  admin-password: admin
+  client-ids:
+    admin-ui: serenity-admin-ui
+    mobile-app: serenity-mobile-app
+    collector-app: serenity-collector-app
+  client-secrets:
+    serenity-admin-ui: YzJlZjQ3Y2MtMjRlNS00YjM5LTk0NDYtNTNiMjU3YjQ2MjE5
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html

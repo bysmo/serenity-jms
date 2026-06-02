@@ -1,0 +1,73 @@
+server:
+  port: 8086
+
+spring:
+  application:
+    name: notification-service
+  datasource:
+    url: jdbc:postgresql://localhost:5437/serenity_notification
+    username: serenity
+    password: serenity123
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:8180/realms/serenity/protocol/openid-connect/certs
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: notification-service
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "com.bysmo.serenity.common.event"
+  mail:
+    host: localhost
+    port: 587
+    username: noreply@serenity.com
+    password: password
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+notification:
+  sms:
+    default-provider: orange
+    providers:
+      orange:
+        api-url: https://api.orange.com/sms/v1
+        api-key: ""
+        sender-name: SERENITY
+      mtn:
+        api-url: https://api.mtn.com/sms/v1
+        api-key: ""
+        sender-name: SERENITY
+  fcm:
+    service-account-key-path: ""
+  admin-emails:
+    - admin@serenity.com
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
