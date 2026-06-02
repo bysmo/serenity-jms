@@ -102,5 +102,5 @@ resilience4j:
 
 logging:
   level:
-    com.bysmo.serenity.nanocredit: DEBUG
+    com.serenity.nanocredit: DEBUG
     org.springframework.kafka: INFO

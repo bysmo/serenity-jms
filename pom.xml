@@ -11,7 +11,7 @@
         <relativePath/>
     </parent>
 
-    <groupId>com.bysmo.serenity</groupId>
+    <groupId>com.serenity</groupId>
     <artifactId>serenity-jms</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
@@ -37,6 +37,7 @@
         <!-- Business Services Phase 2 -->
         <module>nano-credit-service</module>
         <module>epargne-service</module>
+        <module>keycloak-service</module>
     </modules>
 
     <properties>
@@ -66,7 +67,7 @@
 
             <!-- Internal Common Library -->
             <dependency>
-                <groupId>com.bysmo.serenity</groupId>
+                <groupId>com.serenity</groupId>
                 <artifactId>common-lib</artifactId>
                 <version>${project.version}</version>
             </dependency>

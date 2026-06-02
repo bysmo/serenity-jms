@@ -10,81 +10,46 @@ spring:
         locator:
           enabled: true
           lower-case-service-id: true
-      globalcors:
-        cors-configurations:
-          '[/**]':
-            allowed-origins: "*"
-            allowed-methods: "*"
-            allowed-headers: "*"
-            allow-credentials: true
       routes:
-        - id: identity-service
-          uri: lb://identity-service
+        - id: auth-service
+          uri: lb://auth-service
           predicates:
-            - Path=/api/v1/auth/**, /api/v1/users/**, /api/v1/roles/**
+            - Path=/api/v1/auth/**
           filters:
             - StripPrefix=0
 
         - id: member-service
           uri: lb://member-service
           predicates:
-            - Path=/api/v1/members/**, /api/v1/segments/**, /api/v1/kyc/**, /api/v1/parrainage/**, /api/v1/comptes-externes/**
+            - Path=/api/v1/members/**
           filters:
             - StripPrefix=0
 
-        - id: account-service
-          uri: lb://account-service
+        - id: keycloak-service
+          uri: lb://keycloak-service
           predicates:
-            - Path=/api/v1/accounts/**, /api/v1/transfers/**, /api/v1/movements/**
+            - Path=/api/v1/keycloak/**
           filters:
             - StripPrefix=0
 
-        - id: cotisation-service
-          uri: lb://cotisation-service
+        - id: payment-service
+          uri: lb://payment-service
           predicates:
-            - Path=/api/v1/cotisations/**, /api/v1/payments/**, /api/v1/engagements/**, /api/v1/adhesions/**, /api/v1/refunds/**
+            - Path=/api/v1/payments/**
           filters:
             - StripPrefix=0
 
-        - id: admin-service
-          uri: lb://admin-service
+        - id: refund-service
+          uri: lb://refund-service
           predicates:
-            - Path=/api/v1/admin/**, /api/v1/settings/**, /api/v1/audit/**, /api/v1/announcements/**
+            - Path=/api/v1/refunds/**
           filters:
             - StripPrefix=0
 
-        - id: notification-service
-          uri: lb://notification-service
+        - id: savings-service
+          uri: lb://savings-service
           predicates:
-            - Path=/api/v1/notifications/**, /api/v1/email-templates/**
-          filters:
-            - StripPrefix=0
-
-        - id: payment-gateway-service
-          uri: lb://payment-gateway-service
-          predicates:
-            - Path=/api/v1/payment-gateways/**, /api/v1/webhooks/**
-          filters:
-            - StripPrefix=0
-
-        - id: collector-service
-          uri: lb://collector-service
-          predicates:
-            - Path=/api/v1/collector/**
-          filters:
-            - StripPrefix=0
-
-        - id: nano-credit-service
-          uri: lb://nano-credit-service
-          predicates:
-            - Path=/api/v1/nano-credits/**, /api/v1/nano-credit-paliers/**
-          filters:
-            - StripPrefix=0
-
-        - id: epargne-service
-          uri: lb://epargne-service
-          predicates:
-            - Path=/api/v1/epargne/**, /api/v1/epargne-plans/**
+            - Path=/api/v1/epargne/**
           filters:
             - StripPrefix=0
 
@@ -98,19 +63,10 @@ eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka/
-  instance:
-    prefer-ip-address: true
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,gateway
-  endpoint:
-    health:
-      show-details: always
+    register-with-eureka: true
+    fetch-registry: true
 
 logging:
   level:
-    org.springframework.cloud.gateway: DEBUG
     org.springframework.security: DEBUG
+    org.springframework.cloud.gateway: DEBUG

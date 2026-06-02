@@ -90,5 +90,5 @@ resilience4j:
 
 logging:
   level:
-    com.bysmo.serenity.cotisation: DEBUG
+    com.serenity.cotisation: DEBUG
     org.springframework.kafka: INFO

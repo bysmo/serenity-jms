@@ -1,7 +1,0 @@
-package com.bysmo.serenity.nanocredit.entity.enums;
-
-public enum FrequenceRemboursement {
-    QUOTIDIENNE,
-    HEBDOMADAIRE,
-    MENSUELLE
-}

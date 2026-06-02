@@ -5,13 +5,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.bysmo.serenity</groupId>
+        <groupId>com.serenity</groupId>
         <artifactId>serenity-jms</artifactId>
         <version>1.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <groupId>com.bysmo.serenity</groupId>
+    <groupId>com.serenity</groupId>
     <artifactId>admin-service</artifactId>
     <name>Admin Service</name>
     <description>Administration service for settings, audit, Merkle ledger, auto-numbering, announcements, email templates, and tags</description>
@@ -73,7 +73,7 @@
 
         <!-- Internal Common Library -->
         <dependency>
-            <groupId>com.bysmo.serenity</groupId>
+            <groupId>com.serenity</groupId>
             <artifactId>common-lib</artifactId>
             <version>${project.version}</version>
         </dependency>

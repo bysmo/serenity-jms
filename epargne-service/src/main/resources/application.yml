@@ -43,7 +43,7 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
-        spring.json.trusted.packages: com.bysmo.serenity.*
+        spring.json.trusted.packages: com.serenity.*
 
   security:
     oauth2:
@@ -92,5 +92,5 @@ resilience4j:
 
 logging:
   level:
-    com.bysmo.serenity.epargne: DEBUG
+    com.serenity.epargne: DEBUG
     org.springframework.security: DEBUG

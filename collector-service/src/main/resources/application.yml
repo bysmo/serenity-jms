@@ -72,5 +72,5 @@ springdoc:
 
 logging:
   level:
-    com.bysmo.serenity.collector: DEBUG
+    com.serenity.collector: DEBUG
     org.springframework.kafka: INFO
