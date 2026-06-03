@@ -49,8 +49,8 @@ export default function AutoNumberingPage() {
         const def = item.definition as Record<string, unknown>;
         return (
           <span className="text-sm font-mono">
-            {def.prefix}{def.separator}{'*'.repeat(def.padding as number)}
-            {def.suffix ? `${def.separator}${def.suffix}` : ''}
+            {def.prefix as string}{def.separator as string}{'*'.repeat(def.padding as number)}
+            {def.suffix ? `${def.separator as string}${def.suffix as string}` : ''}
           </span>
         );
       },

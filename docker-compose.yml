@@ -1,0 +1,533 @@
+version: "3.9"
+
+x-postgres-common: &postgres-common
+  image: postgres:16-alpine
+  restart: unless-stopped
+  env_file:
+    - .env
+  environment:
+    POSTGRES_USER: ${POSTGRES_USER}
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+  healthcheck:
+    test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+    interval: 10s
+    timeout: 5s
+    retries: 5
+  networks:
+    - serenity-net
+
+x-microservice-common: &microservice-common
+  restart: unless-stopped
+  networks:
+    - serenity-net
+  environment:
+    EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-service:8761/eureka/
+    SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/serenity/protocol/openid-connect/certs
+    SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+
+services:
+  # ──────────────────────────────────────────────────────────
+  # PostgreSQL Instances (one per microservice)
+  # ──────────────────────────────────────────────────────────
+
+  postgres-identity:
+    <<: *postgres-common
+    container_name: serenity-postgres-identity
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: serenity_identity
+    volumes:
+      - pgdata-identity:/var/lib/postgresql/data
+
+  postgres-admin:
+    <<: *postgres-common
+    container_name: serenity-postgres-admin
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: serenity_admin
+    volumes:
+      - pgdata-admin:/var/lib/postgresql/data
+
+  postgres-member:
+    <<: *postgres-common
+    container_name: serenity-postgres-member
+    ports:
+      - "5434:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: serenity_member
+    volumes:
+      - pgdata-member:/var/lib/postgresql/data
+
+  postgres-account:
+    <<: *postgres-common
+    container_name: serenity-postgres-account
+    ports:
+      - "5435:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: serenity_account
+    volumes:
+      - pgdata-account:/var/lib/postgresql/data
+
+  postgres-cotisation:
+    <<: *postgres-common
+    container_name: serenity-postgres-cotisation
+    ports:
+      - "5436:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: serenity_cotisation
+    volumes:
+      - pgdata-cotisation:/var/lib/postgresql/data
+
+  postgres-notification:
+    <<: *postgres-common
+    container_name: serenity-postgres-notification
+    ports:
+      - "5437:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: serenity_notification
+    volumes:
+      - pgdata-notification:/var/lib/postgresql/data
+
+  postgres-payment:
+    <<: *postgres-common
+    container_name: serenity-postgres-payment
+    ports:
+      - "5438:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: serenity_payment
+    volumes:
+      - pgdata-payment:/var/lib/postgresql/data
+
+  postgres-collector:
+    <<: *postgres-common
+    container_name: serenity-postgres-collector
+    ports:
+      - "5439:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: serenity_collector
+    volumes:
+      - pgdata-collector:/var/lib/postgresql/data
+
+  postgres-nanocredit:
+    <<: *postgres-common
+    container_name: serenity-postgres-nanocredit
+    ports:
+      - "5440:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: serenity_nanocredit
+    volumes:
+      - pgdata-nanocredit:/var/lib/postgresql/data
+
+  postgres-epargne:
+    <<: *postgres-common
+    container_name: serenity-postgres-epargne
+    ports:
+      - "5441:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: serenity_epargne
+    volumes:
+      - pgdata-epargne:/var/lib/postgresql/data
+
+  postgres-keycloak:
+    <<: *postgres-common
+    container_name: serenity-postgres-keycloak
+    ports:
+      - "5442:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: serenity_keycloak
+    volumes:
+      - pgdata-keycloak:/var/lib/postgresql/data
+
+  # ──────────────────────────────────────────────────────────
+  # Keycloak
+  # ──────────────────────────────────────────────────────────
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    container_name: serenity-keycloak
+    restart: unless-stopped
+    command: start-dev --import-realm
+    env_file:
+      - .env
+    environment:
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres-keycloak:5432/serenity_keycloak
+      KC_DB_USERNAME: ${POSTGRES_USER}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
+      KC_HEALTH_ENABLED: "true"
+    ports:
+      - "8180:8080"
+    depends_on:
+      postgres-keycloak:
+        condition: service_healthy
+    volumes:
+      - ./docker/keycloak/serenity-realm.json:/opt/keycloak/data/import/serenity-realm.json
+    networks:
+      - serenity-net
+
+  # ──────────────────────────────────────────────────────────
+  # Zookeeper
+  # ──────────────────────────────────────────────────────────
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.0
+    container_name: serenity-zookeeper
+    restart: unless-stopped
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    volumes:
+      - zookeeper-data:/var/lib/zookeeper/data
+      - zookeeper-logs:/var/lib/zookeeper/log
+    networks:
+      - serenity-net
+
+  # ──────────────────────────────────────────────────────────
+  # Kafka
+  # ──────────────────────────────────────────────────────────
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: serenity-kafka
+    restart: unless-stopped
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_LOG_RETENTION_HOURS: 168
+    ports:
+      - "9092:9092"
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    networks:
+      - serenity-net
+
+  # ──────────────────────────────────────────────────────────
+  # Kafka UI
+  # ──────────────────────────────────────────────────────────
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: serenity-kafka-ui
+    restart: unless-stopped
+    depends_on:
+      - kafka
+    environment:
+      KAFKA_CLUSTERS_0_NAME: serenity
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+    ports:
+      - "9000:8080"
+    networks:
+      - serenity-net
+
+  # ──────────────────────────────────────────────────────────
+  # Spring Boot Microservices
+  # ──────────────────────────────────────────────────────────
+
+  discovery-service:
+    build:
+      context: ./discovery-service
+      dockerfile: Dockerfile
+    container_name: serenity-discovery-service
+    ports:
+      - "8761:8761"
+    networks:
+      - serenity-net
+    restart: unless-stopped
+
+  config-service:
+    build:
+      context: ./config-service
+      dockerfile: Dockerfile
+    container_name: serenity-config-service
+    ports:
+      - "8888:8888"
+    depends_on:
+      - discovery-service
+    networks:
+      - serenity-net
+    environment:
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-service:8761/eureka/
+    restart: unless-stopped
+
+  gateway-service:
+    <<: *microservice-common
+    build:
+      context: ./gateway-service
+      dockerfile: Dockerfile
+    container_name: serenity-gateway-service
+    ports:
+      - "8080:8080"
+    depends_on:
+      - discovery-service
+      - keycloak
+
+  identity-service:
+    <<: *microservice-common
+    build:
+      context: ./identity-service
+      dockerfile: Dockerfile
+    container_name: serenity-identity-service
+    ports:
+      - "8081:8081"
+    environment:
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-service:8761/eureka/
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/serenity/protocol/openid-connect/certs
+      KEYCLOAK_SERVER_URL: http://keycloak:8080
+    depends_on:
+      - discovery-service
+      - keycloak
+
+  member-service:
+    <<: *microservice-common
+    build:
+      context: ./member-service
+      dockerfile: Dockerfile
+    container_name: serenity-member-service
+    ports:
+      - "8082:8082"
+    environment:
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-service:8761/eureka/
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/serenity/protocol/openid-connect/certs
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-member:5432/serenity_member
+    depends_on:
+      - discovery-service
+      - postgres-member
+      - kafka
+
+  account-service:
+    <<: *microservice-common
+    build:
+      context: ./account-service
+      dockerfile: Dockerfile
+    container_name: serenity-account-service
+    ports:
+      - "8083:8083"
+    environment:
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-service:8761/eureka/
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/serenity/protocol/openid-connect/certs
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-account:5432/serenity_account
+    depends_on:
+      - discovery-service
+      - postgres-account
+      - kafka
+
+  cotisation-service:
+    <<: *microservice-common
+    build:
+      context: ./cotisation-service
+      dockerfile: Dockerfile
+    container_name: serenity-cotisation-service
+    ports:
+      - "8084:8084"
+    environment:
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-service:8761/eureka/
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/serenity/protocol/openid-connect/certs
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-cotisation:5432/serenity_cotisation
+    depends_on:
+      - discovery-service
+      - postgres-cotisation
+      - kafka
+
+  admin-service:
+    <<: *microservice-common
+    build:
+      context: ./admin-service
+      dockerfile: Dockerfile
+    container_name: serenity-admin-service
+    ports:
+      - "8085:8085"
+    environment:
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-service:8761/eureka/
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/serenity/protocol/openid-connect/certs
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-admin:5432/serenity_admin
+    depends_on:
+      - discovery-service
+      - postgres-admin
+
+  notification-service:
+    <<: *microservice-common
+    build:
+      context: ./notification-service
+      dockerfile: Dockerfile
+    container_name: serenity-notification-service
+    ports:
+      - "8086:8086"
+    environment:
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-service:8761/eureka/
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/serenity/protocol/openid-connect/certs
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-notification:5432/serenity_notification
+    depends_on:
+      - discovery-service
+      - postgres-notification
+      - kafka
+
+  payment-gateway-service:
+    <<: *microservice-common
+    build:
+      context: ./payment-gateway-service
+      dockerfile: Dockerfile
+    container_name: serenity-payment-gateway-service
+    ports:
+      - "8087:8087"
+    environment:
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-service:8761/eureka/
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/serenity/protocol/openid-connect/certs
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-payment:5432/serenity_payment
+    depends_on:
+      - discovery-service
+      - postgres-payment
+      - kafka
+
+  collector-service:
+    <<: *microservice-common
+    build:
+      context: ./collector-service
+      dockerfile: Dockerfile
+    container_name: serenity-collector-service
+    ports:
+      - "8098:8088"
+    environment:
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-service:8761/eureka/
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/serenity/protocol/openid-connect/certs
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-collector:5432/serenity_collector
+    depends_on:
+      - discovery-service
+      - postgres-collector
+      - kafka
+
+  nano-credit-service:
+    <<: *microservice-common
+    build:
+      context: ./nano-credit-service
+      dockerfile: Dockerfile
+    container_name: serenity-nano-credit-service
+    ports:
+      - "8089:8089"
+    environment:
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-service:8761/eureka/
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/serenity/protocol/openid-connect/certs
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-nanocredit:5432/serenity_nanocredit
+    depends_on:
+      - discovery-service
+      - postgres-nanocredit
+      - kafka
+
+  epargne-service:
+    <<: *microservice-common
+    build:
+      context: ./epargne-service
+      dockerfile: Dockerfile
+    container_name: serenity-epargne-service
+    ports:
+      - "8090:8090"
+    environment:
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-service:8761/eureka/
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/serenity/protocol/openid-connect/certs
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-epargne:5432/serenity_epargne
+    depends_on:
+      - discovery-service
+      - postgres-epargne
+      - kafka
+
+  keycloak-service:
+    <<: *microservice-common
+    build:
+      context: ./keycloak-service
+      dockerfile: Dockerfile
+    container_name: serenity-keycloak-service
+    ports:
+      - "8091:8091"
+    environment:
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-service:8761/eureka/
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/serenity/protocol/openid-connect/certs
+      KEYCLOAK_SERVER_URL: http://keycloak:8080
+    depends_on:
+      - discovery-service
+      - keycloak
+
+# ============================================================
+# Networks
+# ============================================================
+
+networks:
+  serenity-net:
+    driver: bridge
+    name: serenity-net
+
+# ============================================================
+# Volumes
+# ============================================================
+
+volumes:
+  pgdata-identity:
+    name: serenity-pgdata-identity
+  pgdata-admin:
+    name: serenity-pgdata-admin
+  pgdata-member:
+    name: serenity-pgdata-member
+  pgdata-account:
+    name: serenity-pgdata-account
+  pgdata-cotisation:
+    name: serenity-pgdata-cotisation
+  pgdata-notification:
+    name: serenity-pgdata-notification
+  pgdata-payment:
+    name: serenity-pgdata-payment
+  pgdata-collector:
+    name: serenity-pgdata-collector
+  pgdata-nanocredit:
+    name: serenity-pgdata-nanocredit
+  pgdata-epargne:
+    name: serenity-pgdata-epargne
+  pgdata-keycloak:
+    name: serenity-pgdata-keycloak
+  zookeeper-data:
+    name: serenity-zookeeper-data
+  zookeeper-logs:
+    name: serenity-zookeeper-logs
+  kafka-data:
+    name: serenity-kafka-data

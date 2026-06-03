@@ -311,6 +311,7 @@ export default function EpargnePage() {
       const newPlan: EpargnePlan = {
         id: String(Date.now()),
         ...formData,
+        actif: formData.actif ?? true,
         createdAt: new Date().toISOString(),
       };
       setPlans([...plans, newPlan]);

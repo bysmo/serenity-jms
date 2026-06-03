@@ -18,10 +18,12 @@ keycloak:
   admin-password: admin
   client-ids:
     admin-ui: serenity-admin-ui
+    serenity-ui: serenity-ui
     mobile-app: serenity-mobile-app
     collector-app: serenity-collector-app
   client-secrets:
     serenity-admin-ui: YzJlZjQ3Y2MtMjRlNS00YjM5LTk0NDYtNTNiMjU3YjQ2MjE5
+    serenity-ui: YzJlZjQ3Y2MtMjRlNS00YjM5LTk0NDYtNTNiMjU3YjQ2MjE5
 
 eureka:
   client:

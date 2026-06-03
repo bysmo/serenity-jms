@@ -4,6 +4,11 @@ server:
 spring:
   application:
     name: cotisation-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:8180/realms/serenity/protocol/openid-connect/certs
 
   datasource:
     url: jdbc:postgresql://localhost:5436/serenity_cotisation

@@ -50,6 +50,7 @@ export interface SearchParams {
 export interface LoginRequest {
   username: string;
   password: string;
+  clientId?: string;
 }
 
 export interface LoginResponse {
@@ -60,11 +61,12 @@ export interface LoginResponse {
 }
 
 export interface RegisterRequest {
+  username: string;
   email: string;
   password: string;
   firstName: string;
   lastName: string;
-  telephone: string;
+  phoneNumber?: string;
 }
 
 export interface UserInfoResponse {
@@ -772,8 +774,8 @@ export interface AuditLog {
   action: string;
   model: string;
   modelId: string;
-  oldValues?: Record<string, unknown>;
-  newValues?: Record<string, unknown>;
+  oldValues?: Record<string, unknown> | null;
+  newValues?: Record<string, unknown> | null;
   ipAddress?: string;
   userAgent?: string;
   createdAt: string;

@@ -10,9 +10,21 @@ spring:
         locator:
           enabled: true
           lower-case-service-id: true
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:3000"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: true
       routes:
         - id: auth-service
-          uri: lb://auth-service
+          uri: lb://identity-service
           predicates:
             - Path=/api/v1/auth/**
           filters:
@@ -21,7 +33,7 @@ spring:
         - id: member-service
           uri: lb://member-service
           predicates:
-            - Path=/api/v1/members/**
+            - Path=/api/v1/members/**,/api/v1/comptes-externes/**,/api/v1/kyc/**,/api/v1/segments/**,/api/v1/parrainage/**
           filters:
             - StripPrefix=0
 
@@ -32,24 +44,59 @@ spring:
           filters:
             - StripPrefix=0
 
-        - id: payment-service
-          uri: lb://payment-service
+        - id: payment-gateway-service
+          uri: lb://payment-gateway-service
           predicates:
-            - Path=/api/v1/payments/**
+            - Path=/api/v1/payment-gateways/**,/api/v1/webhooks/**
           filters:
             - StripPrefix=0
 
-        - id: refund-service
-          uri: lb://refund-service
+        - id: cotisation-service
+          uri: lb://cotisation-service
           predicates:
-            - Path=/api/v1/refunds/**
+            - Path=/api/v1/payments/**,/api/v1/refunds/**,/api/v1/cotisations/**,/api/v1/adhesions/**,/api/v1/engagements/**,/api/v1/versement-demandes/**
           filters:
             - StripPrefix=0
 
-        - id: savings-service
-          uri: lb://savings-service
+        - id: epargne-service
+          uri: lb://epargne-service
           predicates:
-            - Path=/api/v1/epargne/**
+            - Path=/api/v1/epargne/**,/api/v1/epargne-plans/**
+          filters:
+            - StripPrefix=0
+
+        - id: admin-service
+          uri: lb://admin-service
+          predicates:
+            - Path=/api/v1/admin/**,/api/v1/audit/**,/api/v1/settings/**,/api/v1/announcements/**,/api/v1/email-templates/**
+          filters:
+            - StripPrefix=0
+
+        - id: account-service
+          uri: lb://account-service
+          predicates:
+            - Path=/api/v1/accounts/**,/api/v1/movements/**,/api/v1/transfers/**
+          filters:
+            - StripPrefix=0
+
+        - id: collector-service
+          uri: lb://collector-service
+          predicates:
+            - Path=/api/v1/collector/**
+          filters:
+            - StripPrefix=0
+
+        - id: nano-credit-service
+          uri: lb://nano-credit-service
+          predicates:
+            - Path=/api/v1/nano-credits/**,/api/v1/nano-credit-paliers/**
+          filters:
+            - StripPrefix=0
+
+        - id: notification-service
+          uri: lb://notification-service
+          predicates:
+            - Path=/api/v1/notifications/**
           filters:
             - StripPrefix=0
 

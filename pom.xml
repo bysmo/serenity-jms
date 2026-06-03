@@ -38,6 +38,7 @@
         <module>nano-credit-service</module>
         <module>epargne-service</module>
         <module>keycloak-service</module>
+        
     </modules>
 
     <properties>

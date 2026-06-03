@@ -33,6 +33,10 @@ public class SecurityConfig {
                         // Permit anonymous access to member self-registration
                         .pathMatchers("/api/v1/members/register").permitAll()
                         .pathMatchers("/api/v1/members/verify-otp").permitAll()
+                        // Permit webhooks
+                        .pathMatchers("/api/v1/webhooks/**").permitAll()
+                        // Permit Swagger/OpenAPI docs
+                        .pathMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/*/v3/api-docs").permitAll()
                         // All other endpoints require authentication
                         .anyExchange().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2

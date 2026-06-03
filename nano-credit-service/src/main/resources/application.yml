@@ -52,7 +52,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: http://localhost:8080/realms/serenity/protocol/openid-connect/certs
+          jwk-set-uri: http://localhost:8180/realms/serenity/protocol/openid-connect/certs
 
 eureka:
   client:

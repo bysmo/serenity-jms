@@ -54,7 +54,6 @@ export const STATUT_COLORS: Record<string, string> = {
   REFUSE: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
   DEBOURSE: 'bg-sky-100 text-sky-800 dark:bg-sky-900 dark:text-sky-300',
   EN_RETARD: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
-  REMBOURSE: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300',
 
   // Souscription
   ACTIVE: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300',

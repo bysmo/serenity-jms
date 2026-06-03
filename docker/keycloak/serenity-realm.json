@@ -134,6 +134,31 @@
   },
   "clients": [
     {
+      "clientId": "serenity-ui",
+      "name": "Serenity UI",
+      "description": "Serenity main web interface",
+      "enabled": true,
+      "alwaysDisplayInConsole": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "YzJlZjQ3Y2MtMjRlNS00YjM5LTk0NDYtNTNiMjU3YjQ2MjE5",
+      "redirectUris": [
+        "http://localhost:3000/*",
+        "http://localhost:3000/"
+      ],
+      "webOrigins": [
+        "http://localhost:3000"
+      ],
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": true,
+      "publicClient": true,
+      "bearerOnly": false,
+      "consentRequired": false,
+      "fullScopeAllowed": true,
+      "protocol": "openid-connect"
+    },
+    {
       "clientId": "serenity-admin-ui",
       "name": "Serenity Admin UI",
       "description": "Serenity administration web interface",
@@ -308,131 +333,6 @@
       ]
     }
   ],
-  "clientScopeMappings": {
-    "serenity-admin-ui": [
-      {
-        "name": "SUPER_ADMIN"
-      },
-      {
-        "name": "ADMIN"
-      },
-      {
-        "name": "COLLECTEUR"
-      },
-      {
-        "name": "MEMBRE"
-      },
-      {
-        "name": "GESTION_MEMBRES"
-      },
-      {
-        "name": "GESTION_CAISSES"
-      },
-      {
-        "name": "GESTION_COTISATIONS"
-      },
-      {
-        "name": "GESTION_NANO_CREDITS"
-      },
-      {
-        "name": "GESTION_EPARGNE"
-      },
-      {
-        "name": "GESTION_ADMIN"
-      },
-      {
-        "name": "GESTION_COLLECTE"
-      },
-      {
-        "name": "GESTION_RAPPORTS"
-      },
-      {
-        "name": "VIEW_DASHBOARD"
-      }
-    ],
-    "serenity-mobile-app": [
-      {
-        "name": "SUPER_ADMIN"
-      },
-      {
-        "name": "ADMIN"
-      },
-      {
-        "name": "COLLECTEUR"
-      },
-      {
-        "name": "MEMBRE"
-      },
-      {
-        "name": "GESTION_MEMBRES"
-      },
-      {
-        "name": "GESTION_CAISSES"
-      },
-      {
-        "name": "GESTION_COTISATIONS"
-      },
-      {
-        "name": "GESTION_NANO_CREDITS"
-      },
-      {
-        "name": "GESTION_EPARGNE"
-      },
-      {
-        "name": "GESTION_ADMIN"
-      },
-      {
-        "name": "GESTION_COLLECTE"
-      },
-      {
-        "name": "GESTION_RAPPORTS"
-      },
-      {
-        "name": "VIEW_DASHBOARD"
-      }
-    ],
-    "serenity-collector-app": [
-      {
-        "name": "SUPER_ADMIN"
-      },
-      {
-        "name": "ADMIN"
-      },
-      {
-        "name": "COLLECTEUR"
-      },
-      {
-        "name": "MEMBRE"
-      },
-      {
-        "name": "GESTION_MEMBRES"
-      },
-      {
-        "name": "GESTION_CAISSES"
-      },
-      {
-        "name": "GESTION_COTISATIONS"
-      },
-      {
-        "name": "GESTION_NANO_CREDITS"
-      },
-      {
-        "name": "GESTION_EPARGNE"
-      },
-      {
-        "name": "GESTION_ADMIN"
-      },
-      {
-        "name": "GESTION_COLLECTE"
-      },
-      {
-        "name": "GESTION_RAPPORTS"
-      },
-      {
-        "name": "VIEW_DASHBOARD"
-      }
-    ]
-  },
   "clientScopes": [
     {
       "name": "roles",

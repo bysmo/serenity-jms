@@ -161,6 +161,16 @@ function getRefreshToken(): string | null {
 // HTTP Helper
 // -----------------------------------------------------------------------------
 
+export function mapPath(path: string): string {
+  if (path.startsWith('/api/membres')) {
+    return path.replace('/api/membres', '/api/v1/members');
+  }
+  if (path.startsWith('/api/')) {
+    return path.replace('/api/', '/api/v1/');
+  }
+  return path;
+}
+
 interface RequestOptions extends Omit<RequestInit, 'body'> {
   params?: Record<string, string | number | boolean | undefined>;
   body?: unknown;
@@ -174,7 +184,7 @@ async function request<T>(
   const { params, body, auth = true, headers: customHeaders, ...rest } = options;
 
   // Build URL with query params
-  const url = new URL(`${API_BASE_URL}${path}`);
+  const url = new URL(`${API_BASE_URL}${mapPath(path)}`);
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
@@ -274,7 +284,7 @@ async function attemptTokenRefresh(): Promise<boolean> {
       const refreshToken = getRefreshToken();
       if (!refreshToken) return false;
 
-      const response = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
+      const response = await fetch(`${API_BASE_URL}${mapPath('/api/auth/refresh')}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ refreshToken }),
@@ -348,6 +358,13 @@ class SerenityApiClient {
       request<ApiResponse<void>>('/api/auth/change-password', {
         method: 'POST',
         body: data,
+      }),
+
+    forgotPassword: (email: string) =>
+      request<ApiResponse<void>>('/api/auth/forgot-password', {
+        method: 'POST',
+        params: { email },
+        auth: false,
       }),
   };
 

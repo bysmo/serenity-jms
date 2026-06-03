@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent } from '@/components/ui/card';
 import { Plus, Edit, Trash2 } from 'lucide-react';
-import type { PaymentMethod } from '@/types';
+import type { PaymentMethod, PaymentGateway } from '@/types';
 
 const formatFCFA = (amount: number) => `${amount.toLocaleString('fr-FR')} FCFA`;
 
@@ -33,7 +33,7 @@ const mockMethods: (PaymentMethod & Record<string, unknown>)[] = [
 
 const GATEWAY_LABELS: Record<string, string> = { PAYDUNYA: 'PayDunya', PISPI: 'Pi-SPI' };
 
-const emptyForm = { code: '', name: '', gateway: 'PAYDUNYA', description: '', minAmount: 0, maxAmount: 0, feesPercentage: 0, feesFixed: 0, isActive: true };
+const emptyForm = { code: '', name: '', gateway: 'PAYDUNYA' as PaymentGateway, description: '', minAmount: 0, maxAmount: 0, feesPercentage: 0, feesFixed: 0, isActive: true };
 
 export default function PaymentMethodsPage() {
   const [methods, setMethods] = useState(mockMethods);
@@ -75,7 +75,7 @@ export default function PaymentMethodsPage() {
     setForm({
       code: item.code,
       name: item.name,
-      gateway: item.gateway as string,
+      gateway: item.gateway,
       description: (item.description as string) || '',
       minAmount: item.minAmount as number,
       maxAmount: item.maxAmount as number,
@@ -160,7 +160,7 @@ export default function PaymentMethodsPage() {
             </div>
             <div className="space-y-2">
               <Label>Gateway</Label>
-              <Select value={form.gateway} onValueChange={(v) => setForm({ ...form, gateway: v })}>
+              <Select value={form.gateway} onValueChange={(v) => setForm({ ...form, gateway: v as PaymentGateway })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="PAYDUNYA">PayDunya</SelectItem>

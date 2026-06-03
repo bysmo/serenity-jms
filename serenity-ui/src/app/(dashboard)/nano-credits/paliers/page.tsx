@@ -211,6 +211,7 @@ export default function PaliersPage() {
       const newPalier: NanoCreditPalier = {
         id: String(Date.now()),
         ...formData,
+        actif: formData.actif ?? true,
         minMontantTotalRembourse: 0,
         minEpargneCumulee: 0,
         minEpargnePercent: 0,
